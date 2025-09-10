@@ -7,7 +7,7 @@ int SlowGetPage(int key) {
 }
 
 int main() {
-    TwoQCache<int> c(6);
+    caches::TwoQCache<int> c{6};
 
     int m = 0;
     while (std::cin >> m) {
