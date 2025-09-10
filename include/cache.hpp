@@ -39,23 +39,20 @@ private:
         if (list.empty()) {
             throw std::runtime_error("Attempt to delete an element from an empty list");
         }
-
         keyT last_key = list.back();
         list.pop_back();
         hash.erase(last_key);
-
         return last_key;
     }
 
 public:
     TwoQCache(size_t sz) {
-        if (sz == 0) {
-            throw std::invalid_argument("The cache size cannot be zero");
-        }
-
         am_capacity = static_cast<size_t>(sz * kAmRatio);
         a1_in_capacity = sz - am_capacity;
         a1_out_capacity = a1_in_capacity;
+        if (am_capacity <= 0 || a1_in_capacity <= 0 || a1_out_capacity <= 0) {
+            throw std::invalid_argument("The cache size is too small");
+        }
     }
 
     void PrintCache() { // NOTE debug
@@ -88,6 +85,7 @@ public:
             }
             am.splice(am.begin(), a1_in, hit->second);
             a1_in_hash.erase(hit->first);
+            am_hash[hit->first] = am.begin();
             return true;
         } else if (a1_out_hash.contains(key)) {
             if (am.size() == am_capacity) {
@@ -105,7 +103,7 @@ public:
                 }
                 keyT last_key = RemoveLast(a1_in, a1_in_hash);
                 a1_out_hash.insert(last_key);
-                a1_out.push_front(last_key);
+                a1_out.emplace_front(last_key);
             }
             a1_in.emplace_front(key, SlowGetPage(key));
             a1_in_hash[key] = a1_in.begin();

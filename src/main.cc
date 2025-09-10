@@ -7,13 +7,13 @@ int SlowGetPage(int key) {
 }
 
 int main() {
-    TwoQCache<int> c(10);
+    TwoQCache<int> c(6);
 
-    for (size_t i = 0; i != 5; ++i) {
-        std::cout << c.LookupUpdate(i, SlowGetPage) << "\n";
+    int m = 0;
+    while (std::cin >> m) {
+        std::cout << (c.LookupUpdate(m, SlowGetPage) ? "hit" : "miss") << "\n";
+        c.PrintCache();
     }
-    c.PrintCache();
-    std::cout << c.LookupUpdate(4, SlowGetPage) << "\n";
-    c.PrintCache();
+    
     return 0;
 }
