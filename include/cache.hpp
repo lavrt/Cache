@@ -2,6 +2,7 @@
 #define CACHE_HPP
 
 #include <iostream>
+#include <vector>
 #include <list>
 #include <unordered_map>
 #include <unordered_set>
@@ -48,13 +49,13 @@ private:
     }
 
 public:
-    TwoQCache(size_t sz, double am_ratio = kDefaultAmRatio) {
+    TwoQCache(size_t size, double am_ratio = kDefaultAmRatio) {
         if (am_ratio <= 0.0 || am_ratio >= 1.0) {
             throw std::invalid_argument("AM ratio must be in the range (0,1)");
         }
 
-        am_capacity_ = static_cast<size_t>(sz * am_ratio);
-        a1_in_capacity_ = sz - am_capacity_;
+        am_capacity_ = static_cast<size_t>(size * am_ratio);
+        a1_in_capacity_ = size - am_capacity_;
         a1_out_capacity_ = a1_in_capacity_;
 
         if (am_capacity_ <= 0 || a1_in_capacity_ <= 0 || a1_out_capacity_ <= 0) {
@@ -127,6 +128,38 @@ public:
             a1_in_.emplace_front(key, SlowGetPage(key));
             a1_in_hash_[key] = a1_in_.begin();
             return false;
+        }
+    }
+};
+
+template <typename T, typename keyT = int>
+class IdealCache {
+    using ListIter = typename std::list<std::pair<keyT, T>>::iterator;
+
+private:
+    size_t capacity_ = 0;
+    std::list<std::pair<keyT, T>> cache_;
+    std::unordered_map<keyT, ListIter> hash_;
+
+    std::vector<keyT> requests_;
+
+public:
+    IdealCache(size_t capacity, const std::vector<keyT>& requests)
+        : requests_(requests), capacity_(capacity)
+    {
+        if (capacity == 0) {
+            throw std::invalid_argument("The size cannot be 0");
+        }
+    }
+
+    template <typename F>
+    bool LookupUpdate(keyT key, F SlowGetPage) {
+        if (hash_.contains(key)) {
+            return true;
+        }
+
+        if (cache_.size() == capacity_) {
+            // TODO
         }
     }
 };
