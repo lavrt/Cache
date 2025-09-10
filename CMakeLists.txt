@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 set(SOURCES
     src/main.cc
-    src/cache.cc
 )
 
 add_executable(cache ${SOURCES})

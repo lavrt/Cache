@@ -113,7 +113,7 @@ public:
             am_.emplace_front(key, SlowGetPage(key));
             am_hash_[key] = am_.begin();
             a1_out_.remove(key);
-            a1_out_hash_.erase(*hit);
+            a1_out_hash_.erase(hit);
             return false;
         } else {
             if (a1_in_.size() == a1_in_capacity_) {
