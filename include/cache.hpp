@@ -22,14 +22,25 @@ private:
     std::unordered_map<keyT, ListIter> a1_in_hash;
 
     size_t a1_out_capacity = 0;
-    std::unordered_set<keyT> a1_out;
+    std::list<keyT> a1_out;
+    std::unordered_set<keyT> a1_out_hash;
 
     keyT RemoveLast(std::list<std::pair<keyT, T>>& list, std::unordered_map<keyT, ListIter>& hash) {
         if (list.empty()) {
             throw std::runtime_error("Attempt to delete an element from an empty list");
         }
-
         keyT last_key = list.back().first;
+        list.pop_back();
+        hash.erase(last_key);
+        return last_key;
+    }
+
+    keyT RemoveLast(std::list<keyT>& list, std::unordered_set<keyT>& hash) {
+        if (list.empty()) {
+            throw std::runtime_error("Attempt to delete an element from an empty list");
+        }
+
+        keyT last_key = list.back();
         list.pop_back();
         hash.erase(last_key);
 
@@ -78,17 +89,23 @@ public:
             am.splice(am.begin(), a1_in, hit->second);
             a1_in_hash.erase(hit->first);
             return true;
-        } else if (a1_out.contains(key)) {
+        } else if (a1_out_hash.contains(key)) {
             if (am.size() == am_capacity) {
                 RemoveLast(am, am_hash);
             }
             am.emplace_front(key, SlowGetPage(key));
             am_hash[key] = am.begin();
-            a1_out.erase(key);
+            a1_out.remove(key);
+            a1_out_hash.erase(key);
             return false;
         } else {
             if (a1_in.size() == a1_in_capacity) {
-                a1_out.insert(RemoveLast(a1_in, a1_in_hash));
+                if (a1_out.size() == a1_out_capacity) {
+                    RemoveLast(a1_out, a1_out_hash);
+                }
+                keyT last_key = RemoveLast(a1_in, a1_in_hash);
+                a1_out_hash.insert(last_key);
+                a1_out.push_front(last_key);
             }
             a1_in.emplace_front(key, SlowGetPage(key));
             a1_in_hash[key] = a1_in.begin();
