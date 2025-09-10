@@ -11,6 +11,8 @@ class TwoQCache {
     using ListIter = typename std::list<std::pair<keyT, T>>::iterator;
     
 private:
+    const double kAmRatio = 0.75;
+
     size_t am_capacity = 0;
     std::list<std::pair<keyT, T>> am;
     std::unordered_map<keyT, ListIter> am_hash;
@@ -40,7 +42,7 @@ public:
             throw std::invalid_argument("The cache size cannot be zero");
         }
 
-        am_capacity = static_cast<size_t>(sz * 0.75);
+        am_capacity = static_cast<size_t>(sz * kAmRatio);
         a1_in_capacity = sz - am_capacity;
         a1_out_capacity = a1_in_capacity;
     }
@@ -64,23 +66,22 @@ public:
 
     template <typename F>
     bool LookupUpdate(keyT key, F SlowGetPage) {
-        if (auto hit_am = am_hash.find(key); hit_am != am_hash.end()) {
-            if (hit_am->second != am.begin()) {
-                am.splice(am.begin(), am, hit_am->second);
+        if (auto hit = am_hash.find(key); hit != am_hash.end()) {
+            if (hit->second != am.begin()) {
+                am.splice(am.begin(), am, hit->second);
             }
             return true;
-        } else if (auto hit_a1_in = a1_in_hash.find(key); hit_a1_in != a1_in_hash.end()) {
+        } else if (auto hit = a1_in_hash.find(key); hit != a1_in_hash.end()) {
             if (am.size() == am_capacity) {
                 RemoveLast(am, am_hash);
             }
-            am.splice(am.begin(), a1_in, hit_a1_in->second);
-            a1_in_hash.erase(hit_a1_in->first);
+            am.splice(am.begin(), a1_in, hit->second);
+            a1_in_hash.erase(hit->first);
             return true;
         } else if (a1_out.contains(key)) {
             if (am.size() == am_capacity) {
                 RemoveLast(am, am_hash);
             }
-            
             am.emplace_front(key, SlowGetPage(key));
             am_hash[key] = am.begin();
             a1_out.erase(key);
@@ -89,7 +90,6 @@ public:
             if (a1_in.size() == a1_in_capacity) {
                 a1_out.insert(RemoveLast(a1_in, a1_in_hash));
             }
-
             a1_in.emplace_front(key, SlowGetPage(key));
             a1_in_hash[key] = a1_in.begin();
             return false;
