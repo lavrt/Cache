@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -113,7 +114,7 @@ public:
             }
             am_.emplace_front(key, SlowGetPage(key));
             am_hash_[key] = am_.begin();
-            a1_out_.remove(key);
+            a1_out_.remove(key); // FIXME
             a1_out_hash_.erase(hit);
             return false;
         } else {
@@ -141,6 +142,7 @@ private:
     std::list<std::pair<keyT, T>> cache_;
     std::unordered_map<keyT, ListIter> hash_;
 
+    size_t current_pos_ = 0;
     std::vector<keyT> requests_;
 
 public:
@@ -152,15 +154,54 @@ public:
         }
     }
 
+    void PrintCache() const {
+        std::cout << "+++++++++++++++++++++++++++\n";
+        std::cout << "cache(" << cache_.size() << "): ";
+        for (auto elem : cache_) {
+            std::cout << elem.second << " ";
+        }
+        std::cout << "\nhash(" << hash_.size() << "): ";
+        for (auto elem : hash_) {
+            std::cout << elem.first << " ";
+        }
+        std::cout << "\n+++++++++++++++++++++++++++\n";
+    }
+
     template <typename F>
     bool LookupUpdate(keyT key, F SlowGetPage) {
+        ++current_pos_;
+
         if (hash_.contains(key)) {
             return true;
         }
 
         if (cache_.size() == capacity_) {
-            // TODO
+            auto further_iter = cache_.begin();
+            size_t further_pos = 0;
+
+            for (auto iter = cache_.begin(); iter != cache_.end(); ++iter) {
+                auto future_iter = std::find(
+                    requests_.begin() + current_pos_, requests_.end(), iter->first
+                );
+
+                if (future_iter == requests_.end()) {
+                    further_iter = iter;
+                    break;
+                }
+
+                if (size_t dst = std::distance(requests_.begin(), future_iter); dst > further_pos) {
+                    further_pos = dst;
+                    further_iter = iter;
+                }
+            }
+
+            hash_.erase(further_iter->first);
+            cache_.erase(further_iter);
         }
+
+        cache_.emplace_front(key, SlowGetPage(key));
+        hash_[key] = cache_.begin();
+        return false;
     }
 };
 
