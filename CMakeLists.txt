@@ -16,7 +16,6 @@ target_include_directories(cache
 )
 
 set(TESTS_SOURCES
-    tests/main_test.cc
     tests/tests.cc
 )
 

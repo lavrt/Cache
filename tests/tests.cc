@@ -40,7 +40,7 @@ static void RunComparativeTests(size_t cache_capacity);
 
 // global ------------------------------------------------------------------------------------------
 
-void RunTests() {
+int main() {
     std::cout << "Running cache tests\n";
     std::cout << kLine;
 
@@ -49,6 +49,8 @@ void RunTests() {
     RunComparativeTests(3);
     
     std::cout << "Testing complete\n";
+
+    return 0;
 }
 
 // static ------------------------------------------------------------------------------------------
