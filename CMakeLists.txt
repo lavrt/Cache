@@ -4,22 +4,27 @@ project(cache)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-set(CACHE_SOURCES
-    src/main.cc
-)
+# tq_cache -------------------------------------------------
 
-add_executable(cache ${CACHE_SOURCES})
+add_executable(tq_cache src/main_2q_cache.cc)
 
-target_include_directories(cache
+target_include_directories(tq_cache
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-set(TESTS_SOURCES
-    tests/tests.cc
+# ideal_cache ----------------------------------------------
+
+add_executable(ideal_cache src/main_ideal_cache.cc)
+
+target_include_directories(ideal_cache
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_executable(tests ${TESTS_SOURCES})
+# tests ----------------------------------------------------
+
+add_executable(tests tests/tests.cc)
 
 target_include_directories(tests
     PUBLIC

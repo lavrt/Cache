@@ -59,9 +59,9 @@ public:
             throw std::invalid_argument("AM ratio must be in the range (0,1)");
         }
 
-        am_capacity_ = static_cast<size_t>(size * am_ratio);
-        a1_in_capacity_ = size - am_capacity_;
-        a1_out_capacity_ = am_capacity_;
+        a1_in_capacity_ = static_cast<size_t>(size * am_ratio);
+        a1_out_capacity_ = size;
+        am_capacity_ = size - am_capacity_;
 
         if (am_capacity_ <= 0 || a1_in_capacity_ <= 0 || a1_out_capacity_ <= 0) {
             throw std::invalid_argument("The cache size is too small");
