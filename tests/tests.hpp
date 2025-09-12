@@ -11,6 +11,4 @@ struct Test {
     std::vector<int> expected_hits_;
 };
 
-void RunTests();
-
 #endif // TESTS_HPP
