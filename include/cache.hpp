@@ -15,7 +15,7 @@ class TwoQCache {
     using ListIter = typename std::list<std::pair<keyT, T>>::iterator;
     
 private:
-    static constexpr double kDefaultAmRatio = 0.75;
+    static constexpr double kDefaultAmRatio = 0.5;
 
     size_t am_capacity_ = 0;
     std::list<std::pair<keyT, T>> am_;
@@ -33,9 +33,11 @@ private:
         if (list.empty()) {
             throw std::runtime_error("Attempt to delete an element from an empty list");
         }
+
         keyT last_key = list.back().first;
         list.pop_back();
         hash.erase(last_key);
+
         return last_key;
     }
 
@@ -43,9 +45,11 @@ private:
         if (list.empty()) {
             throw std::runtime_error("Attempt to delete an element from an empty list");
         }
+
         keyT last_key = list.back();
         list.pop_back();
         hash.erase(last_key);
+
         return last_key;
     }
 
@@ -57,7 +61,7 @@ public:
 
         am_capacity_ = static_cast<size_t>(size * am_ratio);
         a1_in_capacity_ = size - am_capacity_;
-        a1_out_capacity_ = a1_in_capacity_;
+        a1_out_capacity_ = am_capacity_;
 
         if (am_capacity_ <= 0 || a1_in_capacity_ <= 0 || a1_out_capacity_ <= 0) {
             throw std::invalid_argument("The cache size is too small");
@@ -114,7 +118,7 @@ public:
             }
             am_.emplace_front(key, SlowGetPage(key));
             am_hash_[key] = am_.begin();
-            a1_out_.remove(key); // FIXME
+            a1_out_.remove(key); 
             a1_out_hash_.erase(hit);
             return false;
         } else {
