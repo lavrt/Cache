@@ -4,15 +4,15 @@ This project provides C++ implementations of two cache replacement algorithms: t
 
 ## Features
 
-- ##### 2Q Cache:
+- #### 2Q Cache:
     - Uses three queues: A1_in (recently accessed), Am (frequently accessed), and A1_out (ghost queue for evicted from A1_in).
     - Configurable ratio for Am queue size (default 0.5).
     - Supports generic key and value types (default key is int).
-- ##### Ideal Cache:
+- #### Ideal Cache:
     - Evicts the page that will be requested furthest in the future (Belady's optimal algorithm).
     - Requires the full sequence of requests in advance.
     - Supports generic key and value types (default key is int).
-- ##### Testing:
+- #### Testing:
     - Tests for both caches with expected hit/miss sequences.
     - Comparative tests to show hit rates between 2Q and Ideal caches.
 
