@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "cache.hpp"
+#include "caches.hpp"
 #include "tests.hpp"
 
 int SlowGetPage(int key) {

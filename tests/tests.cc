@@ -4,7 +4,7 @@
 #include <cassert>
 #include <iomanip>
 
-#include "cache.hpp"
+#include "caches.hpp"
 
 namespace colors {
     const std::string kRed = "\033[31m";
@@ -33,6 +33,7 @@ static const std::vector<Test> kIdealCacheTests {
 
 static const std::string kLine = "=======================================\n";
 
+static int SlowGetPageForTests(int x);
 static void RunTwoQCacheTests();
 static void RunIdealCacheTests();
 static void RunComparativeTests(size_t cache_capacity);
@@ -52,6 +53,10 @@ void RunTests() {
 
 // static ------------------------------------------------------------------------------------------
 
+static int SlowGetPageForTests(int x) {
+    return x;
+}
+
 static void RunTwoQCacheTests() {
     std::cout << "Running 2Q cache tests\n";
     
@@ -63,16 +68,18 @@ static void RunTwoQCacheTests() {
         caches::TwoQCache<int> cache{test.cache_size_};
 
         for (size_t i = 0; i != test.requests_.size(); ++i) {
-            bool actual_hit = cache.LookupUpdate(test.requests_[i], [](int x) { return x; });
+            bool actual_hit = cache.LookupUpdate(test.requests_[i], SlowGetPageForTests);
             bool expected_hit = test.expected_hits_[i];
 
             if (actual_hit != expected_hit) {
                 std::cout << colors::kRed << "failed" << colors::kReset << std::endl;
 
-                throw std::runtime_error(colors::kRed + "Request " + std::to_string(i + 1) + 
-                                         " (key=" + std::to_string(test.requests_[i]) + 
-                                         "): expected " + (expected_hit ? "HIT" : "MISS") + 
-                                         ", got " + (actual_hit ? "HIT" : "MISS") + colors::kReset);
+                throw std::runtime_error(
+                    colors::kRed + "Request " + std::to_string(i + 1) + 
+                    " (key=" + std::to_string(test.requests_[i]) + 
+                    "): expected " + (expected_hit ? "HIT" : "MISS") + 
+                    ", got " + (actual_hit ? "HIT" : "MISS") + colors::kReset
+                );
             }
         }
 
@@ -94,16 +101,18 @@ static void RunIdealCacheTests() {
         caches::IdealCache<int> cache{test.cache_size_, test.requests_};
 
         for (size_t i = 0; i != test.requests_.size(); ++i) {
-            bool actual_hit = cache.LookupUpdate(test.requests_[i], [](int x) { return x; });
+            bool actual_hit = cache.LookupUpdate(test.requests_[i], SlowGetPageForTests);
             bool expected_hit = test.expected_hits_[i];
 
             if (actual_hit != expected_hit) {
                 std::cout << colors::kRed << "failed" << colors::kReset << std::endl;
 
-                throw std::runtime_error(colors::kRed + "Request " + std::to_string(i + 1) + 
-                                         " (key=" + std::to_string(test.requests_[i]) + 
-                                         "): expected " + (expected_hit ? "HIT" : "MISS") + 
-                                         ", got " + (actual_hit ? "HIT" : "MISS") + colors::kReset);
+                throw std::runtime_error(
+                    colors::kRed + "Request " + std::to_string(i + 1) + 
+                    " (key=" + std::to_string(test.requests_[i]) + 
+                    "): expected " + (expected_hit ? "HIT" : "MISS") + 
+                    ", got " + (actual_hit ? "HIT" : "MISS") + colors::kReset
+                );
             }
         }
 
@@ -120,23 +129,26 @@ static void RunComparativeTests(size_t cache_capacity) {
     size_t counter = 0;
     auto ProcessTests = [&counter, cache_capacity](const std::vector<Test>& tests) {
         for (const Test& test : tests) {
-            std::cout << "comparative_test_" << ++counter << " (based on " << test.test_name_ << "): ";
+            std::cout << "comparative_test_" << ++counter
+                << " (based on " << test.test_name_ << "): ";
 
             caches::TwoQCache<int> tq_cache{cache_capacity};
             size_t hits_tq = 0;
             for (int request : test.requests_) {
-                hits_tq += tq_cache.LookupUpdate(request, [](int x) { return x; });
+                hits_tq += tq_cache.LookupUpdate(request, SlowGetPageForTests);
             }
 
             caches::IdealCache<int> id_cache{cache_capacity, test.requests_};
             size_t hits_id = 0;
             for (int request : test.requests_) {
-                hits_id += id_cache.LookupUpdate(request, [](int x) { return x; });
+                hits_id += id_cache.LookupUpdate(request, SlowGetPageForTests);
             }
 
             std::cout << std::fixed << std::setprecision(1)
-                << colors::kBrightBlue << "TwoQCache: " << colors::kGreen << (100.0 * hits_tq) / test.requests_.size() << "% "
-                << colors::kBrightBlue << "IdealCache: " << colors::kGreen << (100.0 * hits_id) / test.requests_.size() << "%\n"
+                << colors::kBrightBlue << "TwoQCache: "
+                << colors::kGreen << (100.0 * hits_tq) / test.requests_.size() << "% "
+                << colors::kBrightBlue << "IdealCache: "
+                << colors::kGreen << (100.0 * hits_id) / test.requests_.size() << "%\n"
                 << colors::kReset;
         }
     };
