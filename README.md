@@ -40,7 +40,7 @@ Cache/
 ## Building and Running
 1. Configure and Build:
 ```bash
-cmake -B build -S .
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 2. Run Main Application:

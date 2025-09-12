@@ -7,29 +7,28 @@ int SlowGetPage(int key) {
 }
 
 int main() {
-    // caches::TwoQCache<int> c{5};
+    size_t size = 0;
+    size_t number_of_elements = 0;
+    std::cin >> size >> number_of_elements;
 
-    // std::vector<int> d;
-    // std::vector<int> r {1, 2, 3, 1, 2, 4, 5, 1, 2, 3};
-    // for (int el : r) {
-    //     d.push_back(c.LookupUpdate(el, SlowGetPage));
-    //     c.PrintCache();
-    // }
-    // for (int e : d) {
-    //     std::cout << e << ", ";
-    // }
-    // std::cout << "\n";
+    if (!std::cin.good()) {
+        std::cerr << "Input error: expected two integers (size, count)" << std::endl;
+        return 1;
+    }
 
+    caches::TwoQCache<int> cache{size};
 
-
-
-    // std::vector<int> req {1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5};
-    // caches::IdealCache<int> idl{3, req};
-    
-    // for (int n : req) {
-    //     std::cout << n << ": " << (idl.LookupUpdate(n, SlowGetPage) ? "hit" : "miss") << "\n";
-    //     idl.PrintCache();
-    // }
+    size_t number_of_hits = 0;
+    for (size_t i = 0; i != number_of_elements; ++i) {
+        int num = 0;
+        std::cin >> num;
+        if (!std::cin.good()) {
+            std::cerr << "Input error: expected integer at element " << i + 1 << std::endl;
+            return 1;
+        }
+        number_of_hits += cache.LookupUpdate(num, SlowGetPage);
+    }
+    std::cout << number_of_hits << "\n";
 
     return 0;
 }
