@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "caches.hpp"
-#include "tests.hpp"
 
 int SlowGetPage(int key) {
     return key;
@@ -24,12 +23,6 @@ int main() {
 
 
 
-
-
-
-
-
-
     // std::vector<int> req {1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5};
     // caches::IdealCache<int> idl{3, req};
     
@@ -37,8 +30,6 @@ int main() {
     //     std::cout << n << ": " << (idl.LookupUpdate(n, SlowGetPage) ? "hit" : "miss") << "\n";
     //     idl.PrintCache();
     // }
-
-    RunTests();
 
     return 0;
 }
