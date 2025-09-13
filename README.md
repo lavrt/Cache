@@ -25,12 +25,12 @@ This project provides C++ implementations of two cache replacement algorithms: t
 ```
 Cache/
 ├── include/
-│ └── cache.hpp # Main header with both cache implementations
+│ └── caches.hpp
 ├── src/
-│ └── main.cc # Example usage
+| ├── main_2q_cache.cc
+│ └── main_ideal_cache.cc
 ├── tests/
-| ├── main_test.cc # Test runner
-│ ├── tests.cc # Test cases
+| ├── tests.cc
 │ └── tests.hpp
 ├── .gitignore
 ├── CMakeLists.txt
