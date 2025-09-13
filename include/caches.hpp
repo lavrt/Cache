@@ -12,9 +12,11 @@ namespace caches {
 template <typename T, typename keyT = int>
 class TwoQCache {
     using ListIter = typename std::list<std::pair<keyT, T>>::iterator;
+    using OutListIter = typename std::list<keyT>::iterator;
     
 private:
     static constexpr double kDefaultAmRatio = 0.5;
+    static constexpr double kDefaultA1OutRatio = 2;
 
     size_t am_capacity_ = 0;
     std::list<std::pair<keyT, T>> am_;
@@ -26,7 +28,7 @@ private:
 
     size_t a1_out_capacity_ = 0;
     std::list<keyT> a1_out_;
-    std::unordered_set<keyT> a1_out_hash_;
+    std::unordered_map<keyT, OutListIter> a1_out_hash_;
 
     keyT RemoveLast(std::list<std::pair<keyT, T>>& list, std::unordered_map<keyT, ListIter>& hash) {
         if (list.empty()) {
@@ -40,7 +42,7 @@ private:
         return last_key;
     }
 
-    keyT RemoveLast(std::list<keyT>& list, std::unordered_set<keyT>& hash) {
+    keyT RemoveLast(std::list<keyT>& list, std::unordered_map<keyT, OutListIter>& hash) {
         if (list.empty()) {
             throw std::runtime_error("Attempt to delete an element from an empty list");
         }
@@ -53,20 +55,20 @@ private:
     }
 
 public:
-    TwoQCache(size_t size) {
+    TwoQCache(size_t size, double am_ratio = kDefaultAmRatio) {
         if (size == 0) {
             throw std::invalid_argument("Cache size must be at least 1");
         }
 
-        if (size == 1) {
+        a1_in_capacity_ = std::max(static_cast<size_t>(size * (1 - am_ratio)), size_t(0));
+        am_capacity_ = size - a1_in_capacity_;
+
+        if (am_capacity_ == 0) {
             am_capacity_ = 1;
-            a1_in_capacity_ = 0;
-            a1_out_capacity_ = 1;
-        } else {
-            a1_in_capacity_ = static_cast<size_t>(size * (1 - kDefaultAmRatio));
-            am_capacity_ = size - a1_in_capacity_;
-            a1_out_capacity_ = size;
+            a1_in_capacity_ = size - 1;
         }
+
+        a1_out_capacity_ = size * kDefaultA1OutRatio;
     }
 
     size_t GetSize() const noexcept {
@@ -85,7 +87,7 @@ public:
                 RemoveLast(am_, am_hash_);
             }
             am_.splice(am_.begin(), a1_in_, hit->second);
-            am_hash_[hit->first] = am_.begin();
+            am_hash_[key] = am_.begin();
             a1_in_hash_.erase(hit->first);
             return true;
         } else if (auto hit = a1_out_hash_.find(key); hit != a1_out_hash_.end()) {
@@ -94,7 +96,7 @@ public:
             }
             am_.emplace_front(key, SlowGetPage(key));
             am_hash_[key] = am_.begin();
-            a1_out_.remove(key); 
+            a1_out_.erase(hit->second); 
             a1_out_hash_.erase(hit);
             return false;
         } else if (GetSize() == 1) {
@@ -110,8 +112,8 @@ public:
                     RemoveLast(a1_out_, a1_out_hash_);
                 }
                 keyT last_key = RemoveLast(a1_in_, a1_in_hash_);
-                a1_out_hash_.insert(last_key);
                 a1_out_.emplace_front(last_key);
+                a1_out_hash_[last_key] = a1_out_.begin();
             }
             a1_in_.emplace_front(key, SlowGetPage(key));
             a1_in_hash_[key] = a1_in_.begin();
