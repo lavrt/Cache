@@ -45,7 +45,9 @@ cmake --build build
 ```
 2. Run Main Application:
 ```bash
-./build/cache
+./build/tq_cache           # to use the 2Q Cache
+
+./build/ideal_cache        # to use the Ideal Cache
 ```
 3. Run Tests 
 ```bash
