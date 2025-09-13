@@ -53,18 +53,24 @@ private:
     }
 
 public:
-    TwoQCache(size_t size, double am_ratio = kDefaultAmRatio) {
-        if (am_ratio <= 0.0 || am_ratio >= 1.0) {
-            throw std::invalid_argument("AM ratio must be in the range (0,1)");
+    TwoQCache(size_t size) {
+        if (size == 0) {
+            throw std::invalid_argument("Cache size must be at least 1");
         }
 
-        a1_in_capacity_ = static_cast<size_t>(size * am_ratio);
-        a1_out_capacity_ = size;
-        am_capacity_ = size - am_capacity_;
-
-        if (am_capacity_ <= 0 || a1_in_capacity_ <= 0 || a1_out_capacity_ <= 0) {
-            throw std::invalid_argument("The cache size is too small");
+        if (size == 1) {
+            am_capacity_ = 1;
+            a1_in_capacity_ = 0;
+            a1_out_capacity_ = 1;
+        } else {
+            a1_in_capacity_ = static_cast<size_t>(size * (1 - kDefaultAmRatio));
+            am_capacity_ = size - a1_in_capacity_;
+            a1_out_capacity_ = size;
         }
+    }
+
+    size_t GetSize() const noexcept {
+        return am_capacity_ + a1_in_capacity_;
     }
 
     template <typename F>
@@ -90,6 +96,13 @@ public:
             am_hash_[key] = am_.begin();
             a1_out_.remove(key); 
             a1_out_hash_.erase(hit);
+            return false;
+        } else if (GetSize() == 1) {
+            if (!am_.empty()) {
+                RemoveLast(am_, am_hash_);
+            }
+            am_.emplace_front(key, SlowGetPage(key));
+            am_hash_[key] = am_.begin();
             return false;
         } else {
             if (a1_in_.size() == a1_in_capacity_) {
