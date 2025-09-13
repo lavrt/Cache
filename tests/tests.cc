@@ -41,8 +41,7 @@ static void RunComparativeTests(size_t cache_capacity);
 // global ------------------------------------------------------------------------------------------
 
 int main() {
-    std::cout << "Running cache tests\n";
-    std::cout << kLine;
+    std::cout << "Running cache tests\n" << kLine;
 
     RunTwoQCacheTests();
     RunIdealCacheTests();
@@ -88,8 +87,8 @@ static void RunTwoQCacheTests() {
         std::cout << colors::kGreen << "passed" << colors::kReset << std::endl;
     }
 
-    std::cout << colors::kGreen << "2Q cache tests passed successfully\n" << colors::kReset;
-    std::cout << kLine;
+    std::cout << colors::kGreen << "2Q cache tests passed successfully"
+        << colors::kReset << std::endl << kLine;
 }
 
 static void RunIdealCacheTests() {
@@ -121,8 +120,8 @@ static void RunIdealCacheTests() {
         std::cout << colors::kGreen << "passed" << colors::kReset << std::endl;
     }
 
-    std::cout << colors::kGreen << "Ideal cache tests passed successfully\n" << colors::kReset;
-    std::cout << kLine;
+    std::cout << colors::kGreen << "Ideal cache tests passed successfully"
+        << colors::kReset << std::endl << kLine;
 }
 
 static void RunComparativeTests(size_t cache_capacity) {
@@ -150,8 +149,8 @@ static void RunComparativeTests(size_t cache_capacity) {
                 << colors::kBrightBlue << "TwoQCache: "
                 << colors::kGreen << (100.0 * hits_tq) / test.requests_.size() << "% "
                 << colors::kBrightBlue << "IdealCache: "
-                << colors::kGreen << (100.0 * hits_id) / test.requests_.size() << "%\n"
-                << colors::kReset;
+                << colors::kGreen << (100.0 * hits_id) / test.requests_.size() << "%"
+                << colors::kReset << std::endl;
         }
     };
     

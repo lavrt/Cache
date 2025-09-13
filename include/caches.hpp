@@ -68,35 +68,6 @@ public:
         }
     }
 
-    void PrintCache() const { // NOTE debug
-        std::cout << "++++++++++++++++++++++++++++++++\n";
-        std::cout << "Am(" << am_capacity_ << "): ";
-        for (const auto& elem : am_) {
-            std::cout << elem.second << " ";
-        }
-        std::cout << "\nAm_hash:\n";
-        for (const auto& elem : am_hash_) {
-            std::cout << elem.first << " ";
-        }
-        std::cout << "\nA1_in(" << a1_in_capacity_ << "): ";
-        for (const auto& elem : a1_in_) {
-            std::cout << elem.second << " ";
-        } 
-        std::cout << "\na1_in_hash_:\n";
-        for (const auto& elem : a1_in_hash_) {
-            std::cout << elem.first << " ";
-        }
-        std::cout << "\nA1_out(" << a1_out_capacity_ << "): ";
-        for (const auto& elem : a1_out_) {
-            std::cout << elem << " ";
-        }
-        std::cout << "\na1_out_hash_:\n";
-        for (const auto& elem : a1_out_hash_) {
-            std::cout << elem << " ";
-        }
-        std::cout << "\n++++++++++++++++++++++++++++++++\n";
-    }
-
     template <typename F>
     bool LookupUpdate(keyT key, F SlowGetPage) {
         if (auto hit = am_hash_.find(key); hit != am_hash_.end()) {
@@ -156,19 +127,6 @@ public:
         if (capacity == 0) {
             throw std::invalid_argument("The size cannot be 0");
         }
-    }
-
-    void PrintCache() const {
-        std::cout << "+++++++++++++++++++++++++++\n";
-        std::cout << "cache(" << cache_.size() << "): ";
-        for (auto elem : cache_) {
-            std::cout << elem.second << " ";
-        }
-        std::cout << "\nhash(" << hash_.size() << "): ";
-        for (auto elem : hash_) {
-            std::cout << elem.first << " ";
-        }
-        std::cout << "\n+++++++++++++++++++++++++++\n";
     }
 
     template <typename F>
