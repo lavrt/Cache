@@ -104,7 +104,6 @@ int main() {
 - **Am**: LRU queue for frequently accessed pages (promoted from A1_in on hit).
 - **A1_out**: Ghost queue to track evicted pages from A1_in; promotes to Am if hit.
 - Eviction: From A1_in to A1_out, or from Am if full.
-- Goal: Balances recency and frequency without full LRU overhead.
 
 ### Ideal Cache
 - Assumes perfect knowledge of future requests.
