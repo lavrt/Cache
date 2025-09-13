@@ -1,7 +1,6 @@
 #ifndef CACHE_HPP
 #define CACHE_HPP
 
-#include <iostream>
 #include <vector>
 #include <list>
 #include <algorithm>
