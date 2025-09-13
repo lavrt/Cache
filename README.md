@@ -51,11 +51,11 @@ cmake --build build
 ```
 3. Run Tests 
 ```bash
-./build/tests              # Run tests directly
+./build/tests              # run tests directly
 
-cd build && ctest          # Basic output
+cd build && ctest          # basic output
 
-cd build && ctest -V       # Verbose output
+cd build && ctest -V       # verbose output
 ```
 
 ## Usage
@@ -66,30 +66,32 @@ Include ```caches.hpp``` in your project and use the cache classes as follows:
 #include "caches.hpp"
 
 int SlowGetPage(int key) {
-    // Simulate slow page fetch
+    // simulate slow page fetch
     return key;
 }
 
 int main() {
-    caches::TwoQCache<int> cache(10, 0.75);         // Capacity 10, Am ratio is 0.75 (default is 0.5)
-    bool hit = cache.LookupUpdate(1, SlowGetPage);  // Returns false (miss), inserts
-    hit = cache.LookupUpdate(1, SlowGetPage);       // Returns true (hit)
+    caches::TwoQCache<int> cache(10, 0.75);         // capacity 10, Am ratio is 0.75 (default is 0.5)
+    bool hit = cache.LookupUpdate(1, SlowGetPage);  // returns false (miss), inserts
+    hit = cache.LookupUpdate(1, SlowGetPage);       // returns true (hit)
     return 0;
 }
 ```
 
 ### Ideal Cache Example
 ```cpp
+#include <vector>
+
 #include "caches.hpp"
 
 int SlowGetPage(int key) {
-    // Simulate slow page fetch
+    // simulate slow page fetch
     return key;
 }
 
 int main() {
     std::vector<int> requests = {1, 2, 3, 1, 4};  // future request sequence
-    caches::IdealCache<int> cache(3, requests);   // Capacity 3, provide full requests
+    caches::IdealCache<int> cache(3, requests);   // capacity 3, provide full requests
     bool hit = cache.LookupUpdate(1, SlowGetPage);
     return 0;
 }
