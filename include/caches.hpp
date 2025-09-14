@@ -151,6 +151,11 @@ public:
             return true;
         }
 
+        auto this_key_iter = std::find(requests_.begin() + current_pos_, requests_.end(), key);
+        if (this_key_iter == requests_.end()) {
+            return false;
+        }
+
         if (cache_.size() == capacity_) {
             auto further_iter = cache_.begin();
             size_t further_pos = 0;
