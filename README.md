@@ -51,11 +51,13 @@ cmake --build build
 ```
 3. Run Tests 
 ```bash
-./build/tests              # run tests directly
+./build/tests     # run tests directly
 
-cd build && ctest          # basic output
+cd build
 
-cd build && ctest -V       # verbose output
+ctest             # basic output
+
+ctest -V          # verbose output
 ```
 
 ## Usage
