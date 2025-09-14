@@ -139,7 +139,7 @@ public:
         : requests_(requests), capacity_(capacity)
     {
         if (capacity == 0) {
-            throw std::invalid_argument("The size cannot be 0");
+            throw std::invalid_argument("Cache size must be at least 1");
         }
     }
 
