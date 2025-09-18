@@ -1,6 +1,8 @@
 #ifndef CACHE_HPP
 #define CACHE_HPP
 
+#include <map>
+#include <limits>
 #include <vector>
 #include <list>
 #include <algorithm>
@@ -124,15 +126,22 @@ public:
 
 template <typename T, typename keyT = int>
 class IdealCache {
-    using ListIter = typename std::list<std::pair<keyT, T>>::iterator;
-
 private:
     size_t capacity_ = 0;
-    std::list<std::pair<keyT, T>> cache_;
-    std::unordered_map<keyT, ListIter> hash_;
+    std::unordered_map<keyT, T> cache_;
 
     size_t current_pos_ = 0;
+
     std::vector<keyT> requests_;
+    std::unordered_map<keyT, std::vector<size_t>> key_positions_;
+    std::map<size_t, keyT, std::greater<size_t>> eviction_queue_;
+
+    void UpdateEvictionQueue() {
+        if (auto iter = eviction_queue_.find(current_pos_ - 1); iter != eviction_queue_.end()) {
+            eviction_queue_[std::numeric_limits<size_t>::max()] = iter->second;
+            eviction_queue_.erase(iter);
+        }
+    }
 
 public:
     IdealCache(size_t capacity, const std::vector<keyT>& requests)
@@ -141,47 +150,38 @@ public:
         if (capacity == 0) {
             throw std::invalid_argument("Cache size must be at least 1");
         }
+
+        for (size_t i = 0; i != requests_.size(); ++i) {
+            key_positions_[requests_[i]].push_back(i);
+        }
     }
 
     template <typename F>
     bool LookupUpdate(keyT key, F SlowGetPage) {
         ++current_pos_;
 
-        if (hash_.contains(key)) {
+        if (cache_.contains(key)) {
+            UpdateEvictionQueue();
             return true;
         }
 
-        auto this_key_iter = std::find(requests_.begin() + current_pos_, requests_.end(), key);
-        if (this_key_iter == requests_.end()) {
+        auto key_entry = key_positions_.find(key);
+        auto next_pos_iter = std::upper_bound(
+            key_entry->second.begin(), key_entry->second.end(), current_pos_ - 1
+        );
+        if (next_pos_iter == key_entry->second.end()) {
+            UpdateEvictionQueue();
             return false;
         }
 
         if (cache_.size() == capacity_) {
-            auto further_iter = cache_.begin();
-            size_t further_pos = 0;
-
-            for (auto iter = cache_.begin(); iter != cache_.end(); ++iter) {
-                auto future_iter = std::find(
-                    requests_.begin() + current_pos_, requests_.end(), iter->first
-                );
-
-                if (future_iter == requests_.end()) {
-                    further_iter = iter;
-                    break;
-                }
-
-                if (size_t dst = std::distance(requests_.begin(), future_iter); dst > further_pos) {
-                    further_pos = dst;
-                    further_iter = iter;
-                }
-            }
-
-            hash_.erase(further_iter->first);
-            cache_.erase(further_iter);
+            cache_.erase(eviction_queue_.begin()->second);
+            eviction_queue_.erase(eviction_queue_.begin());
         }
 
-        cache_.emplace_front(key, SlowGetPage(key));
-        hash_[key] = cache_.begin();
+        cache_.emplace(key, SlowGetPage(key));
+        eviction_queue_.emplace(key_positions_[key].back(), key);
+        UpdateEvictionQueue();
         return false;
     }
 };
