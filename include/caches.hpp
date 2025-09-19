@@ -136,9 +136,14 @@ private:
     std::unordered_map<keyT, std::vector<size_t>> key_positions_;
     std::map<size_t, keyT, std::greater<size_t>> eviction_queue_;
 
-    void UpdateEvictionQueue() {
+    void UpdateEvictionQueue(std::vector<size_t>::iterator next_key_pos) {
         if (auto iter = eviction_queue_.find(current_pos_); iter != eviction_queue_.end()) {
-            eviction_queue_[std::numeric_limits<size_t>::max()] = iter->second;
+            if (next_key_pos != key_positions_[requests_[current_pos_]].end()) {
+                eviction_queue_[*next_key_pos] = iter->second;
+            } else {
+                eviction_queue_[std::numeric_limits<size_t>::max()] = iter->second;
+            }
+            
             eviction_queue_.erase(iter);
         }
     }
@@ -158,18 +163,19 @@ public:
 
     template <typename F>
     bool LookupUpdate(keyT key, F SlowGetPage) {
-        if (cache_.contains(key)) {
-            UpdateEvictionQueue();
-            ++current_pos_;
-            return true;
-        }
-
         auto key_entry = key_positions_.find(key);
         auto next_pos_iter = std::upper_bound(
             key_entry->second.begin(), key_entry->second.end(), current_pos_
         );
+
+        if (cache_.contains(key)) {
+            UpdateEvictionQueue(next_pos_iter);
+            ++current_pos_;
+            return true;
+        }
+
         if (next_pos_iter == key_entry->second.end()) {
-            UpdateEvictionQueue();
+            UpdateEvictionQueue(next_pos_iter);
             ++current_pos_;
             return false;
         }
@@ -180,9 +186,9 @@ public:
         }
 
         cache_[key] = SlowGetPage(key);
-        eviction_queue_[key_positions_[key].back()] = key;
+        eviction_queue_[*next_pos_iter] = key;
         
-        UpdateEvictionQueue();
+        UpdateEvictionQueue(next_pos_iter);
         ++current_pos_;
         return false;
     }
